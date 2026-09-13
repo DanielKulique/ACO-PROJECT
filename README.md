@@ -1,84 +1,257 @@
-# ACO Project - TSP com Raylib
+ACO Project
 
-Implementacao didatica de **Ant Colony Optimization (ACO)** em C++ para o **Problema do Caixeiro Viajante (TSP)**, com visualizacao em tempo real usando raylib.
+Implementação do algoritmo Ant Colony Optimization (ACO) em C++ para resolução do Problema do Caixeiro Viajante (TSP), com visualização interativa em raylib.
 
-## O que mudou nesta versao
+Dependências
 
-A interface nao recebe mais uma iteracao inteira pronta. Durante a fase `CONSTRUINDO`, cada chamada de `executarPasso()` faz **cada formiga andar no maximo uma aresta**. Assim e possivel observar a construcao gradual das rotas.
+O projeto requer:
 
-Fluxo de uma iteracao:
+C++17
 
-```text
-CONSTRUINDO
-  -> passo 1 das formigas
-  -> passo 2 das formigas
-  -> ...
-FECHANDO_CICLOS
-  -> retorno ao vertice inicial
-ATUALIZANDO_FEROMONIO
-  -> evaporacao
-  -> deposito
-proxima iteracao
-```
+raylib 6.x
 
-A interface tambem mostra, para uma formiga selecionada, o sorteio e as probabilidades dos vertices candidatos da ultima decisao.
+Git
 
-## Arquivos
+CMake
 
-```text
-.
-├── ACO.cpp
-├── ACO.hpp
-├── Ant.cpp
-├── Ant.hpp
-├── Graph.cpp
-├── Graph.hpp
-├── Visualizer.cpp
-├── Visualizer.hpp
-├── main.cpp
-├── Makefile
-└── README.md
-```
+pkg-config
 
-## Controles
+bibliotecas gráficas do sistema
 
-- `SPACE`: pausar / continuar
-- `N`: executar um passo manualmente
-- `R`: reiniciar o ACO
-- `E`: mostrar / esconder caminhos de exploracao
-- `LEFT` / `RIGHT`: trocar a formiga selecionada
-- `UP`: acelerar
-- `DOWN`: desacelerar
+Linux — Ubuntu / Linux Mint / Debian
 
-A aplicacao inicia **pausada** para facilitar o estudo. Pressione `N` para acompanhar passo a passo ou `SPACE` para executar automaticamente.
+1. Instalar compilador e dependências
 
-## Compilacao
+sudo apt update
 
-Com raylib instalado em `/usr/local`:
+sudo apt install -y \
+    build-essential \
+    git \
+    cmake \
+    pkg-config \
+    libasound2-dev \
+    libudev-dev \
+    libx11-dev \
+    libxrandr-dev \
+    libxi-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    libxcursor-dev \
+    libxinerama-dev
 
-```bash
+Confirme:
+
+g++ --version
+
+2. Instalar a raylib
+
+cd ~
+git clone https://github.com/raysan5/raylib.git
+cd raylib
+
+Configure:
+
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_EXAMPLES=OFF
+
+Compile:
+
+cmake --build build -j$(nproc)
+
+Instale:
+
+sudo cmake --install build
+sudo ldconfig
+
+Verifique:
+
+pkg-config --modversion raylib
+pkg-config --cflags --libs raylib
+ls /usr/local/include/raylib.h
+
+3. Compilar o projeto
+
+Com o Makefile:
+
 make clean
 make
 ./main
-```
 
-ou:
+Ou manualmente:
 
-```bash
-make run
-```
+g++ -std=c++17 -Wall -Wextra \
+    main.cpp Graph.cpp Ant.cpp ACO.cpp Visualizer.cpp \
+    -o main \
+    -I/usr/local/include \
+    -L/usr/local/lib \
+    -lraylib \
+    -lGL \
+    -lm \
+    -lpthread \
+    -ldl \
+    -lrt \
+    -lX11 \
+    -lXrandr \
+    -lXi \
+    -lXcursor \
+    -lXinerama
 
-## Parametros atuais
+Windows — MSYS2 / MinGW-w64
 
-No `main.cpp`:
+A forma recomendada para este projeto é usar MSYS2 UCRT64.
 
-- 5 vertices
-- 5 formigas (uma por vertice, para facilitar a visualizacao)
-- 100 iteracoes
-- alpha = 1.0
-- beta = 1.0
-- sigma = 0.01
-- Q = 10.0
-- feromonio inicial = 0.1
+1. Instalar o MSYS2
 
-Com apenas 5 vertices, ainda e perfeitamente possivel encontrar a rota otima na primeira iteracao. Isso nao e um erro: o espaco de busca e pequeno. A diferenca desta versao e que agora e possivel ver **como** cada rota foi construida antes de o melhor global aparecer.
+Instale o MSYS2 e abra o terminal:
+
+MSYS2 UCRT64
+
+Use o terminal UCRT64, não o terminal MSYS comum.
+
+2. Atualizar os pacotes
+
+pacman -Syu
+
+Se o terminal pedir para fechar, abra novamente o MSYS2 UCRT64 e execute:
+
+pacman -Syu
+
+3. Instalar compilador, ferramentas e raylib
+
+pacman -S --needed \
+    mingw-w64-ucrt-x86_64-gcc \
+    mingw-w64-ucrt-x86_64-make \
+    mingw-w64-ucrt-x86_64-pkgconf \
+    mingw-w64-ucrt-x86_64-raylib \
+    git
+
+Verifique:
+
+g++ --version
+pkg-config --modversion raylib
+pkg-config --cflags --libs raylib
+
+4. Compilar no Windows
+
+No terminal MSYS2 UCRT64:
+
+g++ -std=c++17 -Wall -Wextra \
+    main.cpp Graph.cpp Ant.cpp ACO.cpp Visualizer.cpp \
+    -o main.exe \
+    $(pkg-config --cflags --libs raylib)
+
+Execute:
+
+./main.exe
+
+Se preferir link manual:
+
+g++ -std=c++17 -Wall -Wextra \
+    main.cpp Graph.cpp Ant.cpp ACO.cpp Visualizer.cpp \
+    -o main.exe \
+    -lraylib \
+    -lopengl32 \
+    -lgdi32 \
+    -lwinmm
+
+Controles da visualização
+
+Tecla
+
+Função
+
+SPACE
+
+Pausar / continuar
+
+N
+
+Próximo passo
+
+R
+
+Reiniciar
+
+E
+
+Mostrar / ocultar exploração
+
+LEFT / RIGHT
+
+Trocar formiga selecionada
+
+UP
+
+Aumentar velocidade
+
+DOWN
+
+Diminuir velocidade
+
+Funcionamento
+
+Cada formiga escolhe o próximo vértice considerando:
+
+distância;
+
+feromônio;
+
+alpha;
+
+beta.
+
+Heurística:
+
+η(i,j) = 1 / d(i,j)
+
+Probabilidade proporcional a:
+
+[η(i,j)]^alpha × [τ(i,j)]^beta
+
+Após uma iteração:
+
+evaporação;
+
+depósito de feromônio;
+
+atualização do melhor caminho da iteração;
+
+atualização do melhor caminho global.
+
+Depósito:
+
+Δτ = Q / custo_da_rota
+
+Exemplo atual
+
+graph.peso = {
+    { 0, 22, 50, 48, 29},
+    {22,  0, 30, 34, 32},
+    {50, 30,  0, 22, 23},
+    {48, 34, 22,  0, 35},
+    {29, 32, 23, 35,  0}
+};
+
+Solução de problemas
+
+Linux: raylib.h não encontrado
+
+ls /usr/local/include/raylib.h
+
+Package 'raylib' not found
+
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+pkg-config --modversion raylib
+
+Linux: undefined reference to X...
+
+Use o Makefile do projeto ou inclua:
+
+-lGL -lm -lpthread -ldl -lrt -lX11 -lXrandr -lXi -lXcursor -lXinerama
+
+Windows: raylib.dll was not found
+
+Execute pelo terminal MSYS2 UCRT64 ou adicione ao PATH:
+
+C:\msys64\ucrt64\bin
