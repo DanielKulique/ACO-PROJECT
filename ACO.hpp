@@ -39,6 +39,9 @@ class ACO
 		);
 
 		void executar();
+		int escolherProximoVertice(
+			const Ant& ant
+		);
 
 	private:
 
@@ -52,9 +55,7 @@ class ACO
 			int destino
 		) const;
 
-		int escolherProximoVertice(
-			const Ant& ant
-		);
+		
 
 		void evaporarFeromonio();
 

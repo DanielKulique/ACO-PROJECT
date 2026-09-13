@@ -6,8 +6,6 @@
 
 int main()
 {
-    std::cout << "Hello Ant!\n";
-
     Graph graph(5);
 
     graph.peso = {
@@ -18,16 +16,21 @@ int main()
         {29, 32, 23, 35,  0}
     };
 
+    // formiga começa no vértice 0
+    Ant ant(graph.size(), 0);
+
     ACO aco(
         graph,
         10,     // quantidade de formigas
-        100,    // quantidade de iteracoes
+        100,    // quantidade de iterações
         1.0,    // alpha
         1.0,    // beta
-        0.01    // evaporacao
+        0.01,   // sigma
+        10.0,   // Q
+        0.1     // feromônio inicial
     );
 
-    // aco.executar();
+    aco.escolherProximoVertice(ant);
 
     return 0;
 }
