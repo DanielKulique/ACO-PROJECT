@@ -1,29 +1,26 @@
-ACO Project
+# ACO Project
 
-Implementação do algoritmo Ant Colony Optimization (ACO) em C++ para resolução do Problema do Caixeiro Viajante (TSP), com visualização interativa em raylib.
+Implementação do algoritmo **Ant Colony Optimization (ACO)** em C++ para resolver o **Problema do Caixeiro Viajante (TSP)**, com visualização interativa em **raylib**.
 
-Dependências
+## Dependências
 
 O projeto requer:
 
-C++17
+- C++17
+- raylib 6.x
+- Git
+- CMake
+- pkg-config
+- Bibliotecas gráficas do sistema
 
-raylib 6.x
+## Instalação
 
-Git
+### Linux — Ubuntu / Linux Mint / Debian
 
-CMake
+#### 1) Instalar compilador e dependências
 
-pkg-config
-
-bibliotecas gráficas do sistema
-
-Linux — Ubuntu / Linux Mint / Debian
-
-1. Instalar compilador e dependências
-
+```bash
 sudo apt update
-
 sudo apt install -y \
     build-essential \
     git \
@@ -38,48 +35,64 @@ sudo apt install -y \
     libglu1-mesa-dev \
     libxcursor-dev \
     libxinerama-dev
-
-Confirme:
-
-g++ --version
-
-2. Instalar a raylib
-
-cd ~
-git clone https://github.com/raysan5/raylib.git
-cd raylib
-
-Configure:
-
-cmake -S . -B build \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_EXAMPLES=OFF
-
-Compile:
-
-cmake --build build -j$(nproc)
-
-Instale:
-
-sudo cmake --install build
-sudo ldconfig
+```
 
 Verifique:
 
+```bash
+g++ --version
+```
+
+#### 2) Instalar a raylib
+
+```bash
+cd ~
+git clone https://github.com/raysan5/raylib.git
+cd raylib
+```
+
+Configure:
+
+```bash
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_EXAMPLES=OFF
+```
+
+Compile:
+
+```bash
+cmake --build build -j$(nproc)
+```
+
+Instale:
+
+```bash
+sudo cmake --install build
+sudo ldconfig
+```
+
+Verifique:
+
+```bash
 pkg-config --modversion raylib
 pkg-config --cflags --libs raylib
 ls /usr/local/include/raylib.h
+```
 
-3. Compilar o projeto
+#### 3) Compilar o projeto
 
-Com o Makefile:
+**Com o Makefile:**
 
+```bash
 make clean
 make
 ./main
+```
 
-Ou manualmente:
+**Ou manualmente:**
 
+```bash
 g++ -std=c++17 -Wall -Wextra \
     main.cpp Graph.cpp Ant.cpp ACO.cpp Visualizer.cpp \
     -o main \
@@ -96,57 +109,73 @@ g++ -std=c++17 -Wall -Wextra \
     -lXi \
     -lXcursor \
     -lXinerama
+```
 
-Windows — MSYS2 / MinGW-w64
+---
 
-A forma recomendada para este projeto é usar MSYS2 UCRT64.
+### Windows — MSYS2 / MinGW-w64
 
-1. Instalar o MSYS2
+A forma recomendada para este projeto é usar **MSYS2 UCRT64**.
+
+#### 1) Instalar o MSYS2
 
 Instale o MSYS2 e abra o terminal:
 
-MSYS2 UCRT64
+- **MSYS2 UCRT64**
 
-Use o terminal UCRT64, não o terminal MSYS comum.
+Use o terminal **UCRT64**, não o terminal **MSYS** comum.
 
-2. Atualizar os pacotes
+#### 2) Atualizar os pacotes
 
+```bash
 pacman -Syu
+```
 
-Se o terminal pedir para fechar, abra novamente o MSYS2 UCRT64 e execute:
+Se o terminal pedir para fechar, abra novamente o **MSYS2 UCRT64** e execute:
 
+```bash
 pacman -Syu
+```
 
-3. Instalar compilador, ferramentas e raylib
+#### 3) Instalar compilador, ferramentas e raylib
 
+```bash
 pacman -S --needed \
     mingw-w64-ucrt-x86_64-gcc \
     mingw-w64-ucrt-x86_64-make \
     mingw-w64-ucrt-x86_64-pkgconf \
     mingw-w64-ucrt-x86_64-raylib \
     git
+```
 
 Verifique:
 
+```bash
 g++ --version
 pkg-config --modversion raylib
 pkg-config --cflags --libs raylib
+```
 
-4. Compilar no Windows
+#### 4) Compilar no Windows
 
-No terminal MSYS2 UCRT64:
+No terminal **MSYS2 UCRT64**:
 
+```bash
 g++ -std=c++17 -Wall -Wextra \
     main.cpp Graph.cpp Ant.cpp ACO.cpp Visualizer.cpp \
     -o main.exe \
     $(pkg-config --cflags --libs raylib)
+```
 
 Execute:
 
+```bash
 ./main.exe
+```
 
 Se preferir link manual:
 
+```bash
 g++ -std=c++17 -Wall -Wextra \
     main.cpp Graph.cpp Ant.cpp ACO.cpp Visualizer.cpp \
     -o main.exe \
@@ -154,77 +183,57 @@ g++ -std=c++17 -Wall -Wextra \
     -lopengl32 \
     -lgdi32 \
     -lwinmm
+```
 
-Controles da visualização
+## Controles da visualização
 
-Tecla
+| Tecla | Função |
+|---|---|
+| `SPACE` | Pausar / continuar |
+| `N` | Próximo passo |
+| `R` | Reiniciar |
+| `E` | Mostrar / ocultar exploração |
+| `LEFT` / `RIGHT` | Trocar formiga selecionada |
+| `UP` | Aumentar velocidade |
+| `DOWN` | Diminuir velocidade |
 
-Função
-
-SPACE
-
-Pausar / continuar
-
-N
-
-Próximo passo
-
-R
-
-Reiniciar
-
-E
-
-Mostrar / ocultar exploração
-
-LEFT / RIGHT
-
-Trocar formiga selecionada
-
-UP
-
-Aumentar velocidade
-
-DOWN
-
-Diminuir velocidade
-
-Funcionamento
+## Funcionamento
 
 Cada formiga escolhe o próximo vértice considerando:
 
-distância;
+- distância
+- feromônio
+- `alpha`
+- `beta`
 
-feromônio;
+### Heurística
 
-alpha;
+\[
+\eta(i,j) = \frac{1}{d(i,j)}
+\]
 
-beta.
+### Probabilidade proporcional a
 
-Heurística:
-
-η(i,j) = 1 / d(i,j)
-
-Probabilidade proporcional a:
-
-[η(i,j)]^alpha × [τ(i,j)]^beta
+\[
+[\eta(i,j)]^{\alpha} \times [\tau(i,j)]^{\beta}
+\]
 
 Após uma iteração:
 
-evaporação;
+- evaporação
+- depósito de feromônio
+- atualização do melhor caminho da iteração
+- atualização do melhor caminho global
 
-depósito de feromônio;
+### Depósito
 
-atualização do melhor caminho da iteração;
+\[
+\Delta\tau = \frac{Q}{custo\_da\_rota}
+\]
 
-atualização do melhor caminho global.
+## Exemplo atual
 
-Depósito:
-
-Δτ = Q / custo_da_rota
-
-Exemplo atual
-
+```cpp
 graph.peso = {
     { 0, 22, 50, 48, 29},
     {22,  0, 30, 34, 32},
@@ -232,26 +241,35 @@ graph.peso = {
     {48, 34, 22,  0, 35},
     {29, 32, 23, 35,  0}
 };
+```
 
-Solução de problemas
+## Solução de problemas
 
-Linux: raylib.h não encontrado
+### Linux: `raylib.h` não encontrado
 
+```bash
 ls /usr/local/include/raylib.h
+```
 
-Package 'raylib' not found
+### `Package 'raylib' not found`
 
+```bash
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 pkg-config --modversion raylib
+```
 
-Linux: undefined reference to X...
+### Linux: `undefined reference to X...`
 
 Use o Makefile do projeto ou inclua:
 
+```bash
 -lGL -lm -lpthread -ldl -lrt -lX11 -lXrandr -lXi -lXcursor -lXinerama
+```
 
-Windows: raylib.dll was not found
+### Windows: `raylib.dll was not found`
 
-Execute pelo terminal MSYS2 UCRT64 ou adicione ao PATH:
+Execute pelo terminal **MSYS2 UCRT64** ou adicione ao PATH:
 
+```text
 C:\msys64\ucrt64\bin
+```
