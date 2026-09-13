@@ -3,17 +3,14 @@
 
 #include <vector>
 
-
 struct Graph
 {
-	std::vector<std::vector<double>> peso;	
+    std::vector<std::vector<double>> peso;
 
-	Graph(int size);
+    explicit Graph(int size);
 
-	int size() const;
-	double getPeso(int origem, int destino) const;
-
+    int size() const;
+    double getPeso(int origem, int destino) const;
 };
-
 
 #endif

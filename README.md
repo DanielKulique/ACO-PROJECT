@@ -1,23 +1,29 @@
-# ACO Project
+# ACO Project - TSP com Raylib
 
-Implementação do algoritmo **Ant Colony Optimization (ACO)** em C++ para resolução do **Problema do Caixeiro Viajante (Traveling Salesman Problem - TSP)**.
+Implementacao didatica de **Ant Colony Optimization (ACO)** em C++ para o **Problema do Caixeiro Viajante (TSP)**, com visualizacao em tempo real usando raylib.
 
-O projeto está sendo desenvolvido com foco no estudo do funcionamento do ACO, incluindo seleção probabilística de caminhos, evaporação e depósito de feromônio.
+## O que mudou nesta versao
 
-## Objetivo
+A interface nao recebe mais uma iteracao inteira pronta. Durante a fase `CONSTRUINDO`, cada chamada de `executarPasso()` faz **cada formiga andar no maximo uma aresta**. Assim e possivel observar a construcao gradual das rotas.
 
-Encontrar um caminho de baixo custo entre todos os vértices de um grafo utilizando o comportamento coletivo de formigas artificiais.
+Fluxo de uma iteracao:
 
-Cada formiga constrói uma solução percorrendo o grafo e escolhendo o próximo vértice com base em:
+```text
+CONSTRUINDO
+  -> passo 1 das formigas
+  -> passo 2 das formigas
+  -> ...
+FECHANDO_CICLOS
+  -> retorno ao vertice inicial
+ATUALIZANDO_FEROMONIO
+  -> evaporacao
+  -> deposito
+proxima iteracao
+```
 
-- distância entre os vértices;
-- quantidade de feromônio presente na aresta;
-- influência da heurística (`alpha`);
-- influência do feromônio (`beta`).
+A interface tambem mostra, para uma formiga selecionada, o sorteio e as probabilidades dos vertices candidatos da ultima decisao.
 
-Após cada iteração, ocorre atualização da matriz de feromônio.
-
-## Estrutura do projeto
+## Arquivos
 
 ```text
 .
@@ -27,5 +33,52 @@ Após cada iteração, ocorre atualização da matriz de feromônio.
 ├── Ant.hpp
 ├── Graph.cpp
 ├── Graph.hpp
+├── Visualizer.cpp
+├── Visualizer.hpp
 ├── main.cpp
+├── Makefile
 └── README.md
+```
+
+## Controles
+
+- `SPACE`: pausar / continuar
+- `N`: executar um passo manualmente
+- `R`: reiniciar o ACO
+- `E`: mostrar / esconder caminhos de exploracao
+- `LEFT` / `RIGHT`: trocar a formiga selecionada
+- `UP`: acelerar
+- `DOWN`: desacelerar
+
+A aplicacao inicia **pausada** para facilitar o estudo. Pressione `N` para acompanhar passo a passo ou `SPACE` para executar automaticamente.
+
+## Compilacao
+
+Com raylib instalado em `/usr/local`:
+
+```bash
+make clean
+make
+./main
+```
+
+ou:
+
+```bash
+make run
+```
+
+## Parametros atuais
+
+No `main.cpp`:
+
+- 5 vertices
+- 5 formigas (uma por vertice, para facilitar a visualizacao)
+- 100 iteracoes
+- alpha = 1.0
+- beta = 1.0
+- sigma = 0.01
+- Q = 10.0
+- feromonio inicial = 0.1
+
+Com apenas 5 vertices, ainda e perfeitamente possivel encontrar a rota otima na primeira iteracao. Isso nao e um erro: o espaco de busca e pequeno. A diferenca desta versao e que agora e possivel ver **como** cada rota foi construida antes de o melhor global aparecer.
