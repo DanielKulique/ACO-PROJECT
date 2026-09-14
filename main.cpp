@@ -3,28 +3,67 @@
 #include "ACO.hpp"
 #include "Graph.hpp"
 #include "Visualizer.hpp"
+#include <random>
 
 int main()
 {
-    Graph graph(5);
+    const int linhas = 5;
+    const int colunas = 5;
 
-    graph.peso = {
-        { 0, 22, 50, 48, 29},
-        {22,  0, 30, 34, 32},
-        {50, 30,  0, 22, 23},
-        {48, 34, 22,  0, 35},
-        {29, 32, 23, 35,  0}
-    };
+    const int origem = 20;
+    const int destino = 14;
+
+    std::random_device rd;
+    std::mt19937 gerador(rd());
+
+    // pesos inteiros de 1 a 20
+    std::uniform_int_distribution<int> pesoAleatorio(1, 20);
+
+
+    Graph graph(linhas * colunas); // 25 vertices
+
+    for (int linha = 0; linha < linhas; linha++)
+    {
+        for (int coluna = 0; coluna < colunas; coluna++)
+        {
+            int atual = linha * colunas + coluna;
+
+            // liga com o vertice da direita
+            if (coluna < colunas - 1)
+            {
+                int direita = atual + 1;
+
+                double peso = pesoAleatorio(gerador);
+
+                graph.peso[atual][direita] = peso;
+                graph.peso[direita][atual] = peso;
+            }
+
+            // liga com o vertice de baixo
+            if (linha < linhas - 1)
+            {
+                int baixo = atual + colunas;
+
+                double peso = pesoAleatorio(gerador);
+
+                graph.peso[atual][baixo] = peso;
+                graph.peso[baixo][atual] = peso;
+            }
+        }
+    }
+
 
     ACO aco(
         graph,
-        5,       // uma formiga por vertice: mais didatico para visualizar
-        100,     // quantidade de iteracoes
-        1.0,     // alpha: peso da heuristica 1/distancia
-        1.0,     // beta: peso do feromonio
-        0.01,    // sigma: evaporacao
+        20,      // quantidade de formigas
+        100,     // iteracoes
+        1.0,     // alpha
+        1.0,     // beta
+        0.01,    // sigma
         10.0,    // Q
-        0.1      // feromonio inicial
+        0.1,     // feromonio inicial
+        origem,
+        destino
     );
 
     Visualizer visualizer(graph, aco);

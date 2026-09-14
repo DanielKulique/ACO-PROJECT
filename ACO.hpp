@@ -43,6 +43,10 @@ private:
     int iteracoesConcluidas;
     int passoAtual;
 
+    // origem e destino da rota
+    int origem;
+    int destino;
+
     double alpha;
     double beta;
     double sigma;
@@ -63,9 +67,20 @@ private:
 
     FaseACO fase;
 
-    double calcularProbabilidade(const Ant& ant, int destino) const;
-    double calcularHeuristica(int origem, int destino) const;
-    DecisaoACO escolherProximoVertice(const Ant& ant, int indiceFormiga);
+    double calcularProbabilidade(
+        const Ant& ant,
+        int destino
+    ) const;
+
+    double calcularHeuristica(
+        int origem,
+        int destino
+    ) const;
+
+    DecisaoACO escolherProximoVertice(
+        const Ant& ant,
+        int indiceFormiga
+    );
 
     void iniciarIteracao();
     void fecharCiclos();
@@ -84,14 +99,13 @@ public:
         double beta,
         double sigma,
         double Q,
-        double feromonioInicial
+        double feromonioInicial,
+        int origem,
+        int destino
     );
 
-    // Executa uma etapa visual do ACO. Durante CONSTRUINDO, cada formiga
-    // anda no maximo uma aresta por chamada.
     bool executarPasso();
 
-    // Executa ate o fim, util para testes sem a interface grafica.
     void executar();
 
     void reiniciar();

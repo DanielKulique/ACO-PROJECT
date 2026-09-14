@@ -97,59 +97,49 @@ Visualizer::calcularPosicoes() const
         return posicoes;
     }
 
-
     const float larguraGrafo =
         static_cast<float>(
             largura - larguraPainel
         );
 
+    // grade 5x5
+    const int colunas = 5;
 
-    const Vector2 centro = {
-        larguraGrafo / 2.0f,
+    const int linhas =
+        (graph.size() + colunas - 1) / colunas;
 
-        static_cast<float>(altura) /
-            2.0f + 20.0f
-    };
+    // área reservada para o grafo
+    const float esquerda = 90.0f;
+    const float direita = larguraGrafo - 90.0f;
 
+    const float topo = 130.0f;
+    const float baixo =
+        static_cast<float>(altura) - 110.0f;
 
-    const float raio =
-        std::min(
-            larguraGrafo,
-            static_cast<float>(altura)
-        ) * 0.34f;
+    const float espacamentoX =
+        (direita - esquerda) /
+        static_cast<float>(colunas - 1);
 
+    const float espacamentoY =
+        (baixo - topo) /
+        static_cast<float>(linhas - 1);
 
-    for (
-        int i = 0;
-        i < graph.size();
-        ++i
-    )
+    for (int i = 0; i < graph.size(); ++i)
     {
-        const float angulo =
-            -PI_F / 2.0f
-            +
-            (
-                2.0f *
-                PI_F *
-                static_cast<float>(i)
-            )
-            /
-            static_cast<float>(
-                graph.size()
-            );
+        const int linha =
+            i / colunas;
 
+        const int coluna =
+            i % colunas;
 
         posicoes.push_back({
-            centro.x +
-                raio *
-                std::cos(angulo),
+            esquerda +
+                coluna * espacamentoX,
 
-            centro.y +
-                raio *
-                std::sin(angulo)
+            topo +
+                linha * espacamentoY
         });
     }
-
 
     return posicoes;
 }
@@ -911,7 +901,7 @@ void Visualizer::desenharFormigasAtuais(
 
 
             const float raioOffset =
-                38.0f;
+                22.0f;
 
 
             pos = {

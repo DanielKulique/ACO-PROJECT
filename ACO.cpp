@@ -13,13 +13,11 @@ ACO::ACO(
     double beta,
     double sigma,
     double Q,
-    double feromonioInicial
+    double feromonioInicial,
+    int origem,
+    int destino
 )
     : graph(graph),
-      feromonio(
-          graph.size(),
-          std::vector<double>(graph.size(), 0.0)
-      ),
       quantidadeFormigas(quantidadeFormigas),
       quantidadeIteracoes(quantidadeIteracoes),
       iteracoesConcluidas(0),
@@ -29,21 +27,21 @@ ACO::ACO(
       sigma(sigma),
       Q(Q),
       feromonioInicial(feromonioInicial),
+      origem(origem),
+      destino(destino),
       gerador(std::random_device{}()),
       melhorCusto(std::numeric_limits<double>::infinity()),
       melhorCustoIteracao(std::numeric_limits<double>::infinity()),
-      fase(FaseACO::PREPARANDO)
+      fase(FaseACO::PREPARANDO),
+      feromonio(
+          graph.size(),
+          std::vector<double>(
+              graph.size(),
+              feromonioInicial
+          )
+      )
 {
-    inicializarFeromonio();
-
-    if (graph.size() > 0 && quantidadeFormigas > 0 && quantidadeIteracoes > 0)
-    {
-        iniciarIteracao();
-    }
-    else
-    {
-        fase = FaseACO::FINALIZADO;
-    }
+    reiniciar();
 }
 
 void ACO::inicializarFeromonio()
@@ -173,46 +171,40 @@ void ACO::iniciarIteracao()
 
     for (int k = 0; k < quantidadeFormigas; ++k)
     {
-        const int inicio = k % graph.size();
-        formigasAtuais.emplace_back(graph.size(), inicio);
+        formigasAtuais.emplace_back(
+            graph.size(),
+            origem
+        );
     }
 
     melhorCaminhoIteracao.clear();
-    melhorCustoIteracao = std::numeric_limits<double>::infinity();
+
+    melhorCustoIteracao =
+        std::numeric_limits<double>::infinity();
+
     ultimasDecisoes.clear();
 
     passoAtual = 0;
+
     fase = FaseACO::CONSTRUINDO;
 }
-
 bool ACO::rotaCompleta(const Ant& ant) const
 {
     return
-        ant.caminho.size() ==
-            static_cast<std::size_t>(graph.size() + 1) &&
-        ant.caminho.front() == ant.caminho.back();
+        !ant.caminho.empty() &&
+        ant.caminho.front() == origem &&
+        ant.atual == destino;
 }
 
 void ACO::fecharCiclos()
 {
     melhorCaminhoIteracao.clear();
-    melhorCustoIteracao = std::numeric_limits<double>::infinity();
+
+    melhorCustoIteracao =
+        std::numeric_limits<double>::infinity();
 
     for (Ant& ant : formigasAtuais)
     {
-        if (
-            ant.caminho.size() == static_cast<std::size_t>(graph.size()) &&
-            !ant.caminho.empty()
-        )
-        {
-            const int inicio = ant.caminho.front();
-
-            if (graph.getPeso(ant.atual, inicio) > 0.0)
-            {
-                ant.caminhar(inicio, graph);
-            }
-        }
-
         if (!rotaCompleta(ant))
         {
             continue;
@@ -227,7 +219,6 @@ void ACO::fecharCiclos()
         atualizarMelhorSolucao(ant);
     }
 
-    // Mantem uma copia da rodada completa para a visualizacao.
     ultimasFormigas = formigasAtuais;
 }
 
@@ -300,60 +291,64 @@ bool ACO::executarPasso()
     }
 
     if (fase == FaseACO::CONSTRUINDO)
+{
+    ultimasDecisoes.clear();
+
+    bool algumaMoveu = false;
+    bool todasChegaram = true;
+
+    for (std::size_t k = 0;
+         k < formigasAtuais.size();
+         ++k)
     {
-        ultimasDecisoes.clear();
-        bool algumaMoveu = false;
+        Ant& ant = formigasAtuais[k];
 
-        for (std::size_t k = 0; k < formigasAtuais.size(); ++k)
+        // Já chegou ao destino.
+        if (rotaCompleta(ant))
         {
-            Ant& ant = formigasAtuais[k];
+            continue;
+        }
 
-            if (
-                ant.caminho.size() >=
-                static_cast<std::size_t>(graph.size())
-            )
-            {
-                continue;
-            }
+        todasChegaram = false;
 
-            DecisaoACO decisao = escolherProximoVertice(
+        DecisaoACO decisao =
+            escolherProximoVertice(
                 ant,
                 static_cast<int>(k)
             );
 
-            ultimasDecisoes.push_back(decisao);
+        ultimasDecisoes.push_back(decisao);
 
-            if (decisao.destino != -1)
-            {
-                ant.caminhar(decisao.destino, graph);
-                algumaMoveu = true;
-            }
-        }
-
-        ++passoAtual;
-
-        bool todasConstruidas = true;
-
-        for (const Ant& ant : formigasAtuais)
+        if (decisao.destino != -1)
         {
-            if (
-                ant.caminho.size() <
-                static_cast<std::size_t>(graph.size())
-            )
-            {
-                todasConstruidas = false;
-                break;
-            }
-        }
+            ant.caminhar(
+                decisao.destino,
+                graph
+            );
 
-        // Em um grafo incompleto, !algumaMoveu tambem evita loop infinito.
-        if (todasConstruidas || !algumaMoveu)
-        {
-            fase = FaseACO::FECHANDO_CICLOS;
+            algumaMoveu = true;
         }
-
-        return true;
     }
+
+    ++passoAtual;
+
+    /*
+     * Termina a construção quando:
+     *
+     * 1. todas chegaram ao destino;
+     * ou
+     * 2. ninguém consegue mais andar.
+     *
+     * O segundo caso evita loop infinito quando
+     * algumas formigas entram em caminhos sem saída.
+     */
+    if (todasChegaram || !algumaMoveu)
+    {
+        fase = FaseACO::FECHANDO_CICLOS;
+    }
+
+    return true;
+}
 
     if (fase == FaseACO::FECHANDO_CICLOS)
     {
@@ -431,19 +426,36 @@ void ACO::reiniciar()
 
     melhorCaminho.clear();
     melhorCaminhoIteracao.clear();
+
     formigasAtuais.clear();
     ultimasFormigas.clear();
     ultimasDecisoes.clear();
 
-    melhorCusto = std::numeric_limits<double>::infinity();
-    melhorCustoIteracao = std::numeric_limits<double>::infinity();
+    melhorCusto =
+        std::numeric_limits<double>::infinity();
+
+    melhorCustoIteracao =
+        std::numeric_limits<double>::infinity();
 
     inicializarFeromonio();
-    gerador.seed(std::random_device{}());
 
-    if (graph.size() > 0 && quantidadeFormigas > 0 && quantidadeIteracoes > 0)
+    gerador.seed(
+        std::random_device{}()
+    );
+
+    const bool configuracaoValida =
+        graph.size() > 0 &&
+        quantidadeFormigas > 0 &&
+        quantidadeIteracoes > 0 &&
+        origem >= 0 &&
+        origem < graph.size() &&
+        destino >= 0 &&
+        destino < graph.size();
+
+    if (configuracaoValida)
     {
         fase = FaseACO::PREPARANDO;
+
         iniciarIteracao();
     }
     else
